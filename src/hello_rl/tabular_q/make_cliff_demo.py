@@ -82,16 +82,9 @@ def write_demo_md(out_dir: str, sarsa_repr: str, ql_repr: str) -> None:
 
         ## Learned policies (one eval episode each)
 
-        <table>
-        <tr>
-          <th>SARSA — safe path (~−17)</th>
-          <th>Q-learning — cliff-edge path (~−13)</th>
-        </tr>
-        <tr>
-          <td><img src="sarsa.gif" alt="SARSA episode"/></td>
-          <td><img src="ql.gif" alt="Q-learning episode"/></td>
-        </tr>
-        </table>
+        | SARSA — safe path (~−17) | Q-learning — cliff-edge path (~−13) |
+        |---|---|
+        | ![SARSA](sarsa.gif) | ![Q-learning](ql.gif) |
 
         ## Policy grids
 
