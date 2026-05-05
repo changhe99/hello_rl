@@ -201,20 +201,19 @@ if __name__ == "__main__":
     test_n_episode = 10
     n_train = 1000
 
-    # decay epsilon from 1.0 → 0.1 over ~500 episodes × ~20 steps/ep = ~10000 act calls
-    decay_rate = 0.1 ** (1 / 10000)
+    decay_rate = 1.0
 
     env_id = "CliffWalking-v1"
     env = gym.make(env_id, max_episode_steps=200)
 
     # SARSA — on-policy: learns safe path one row above the cliff
-    sarsa_agent = SARSACliffWalkingAgent(env, alpha=0.5, epsilon=1.0, min_epsilon=0.1, gamma=1.0, decay_rate=decay_rate)
+    sarsa_agent = SARSACliffWalkingAgent(env, alpha=0.5, epsilon=0.2, min_epsilon=0.1, gamma=1.0, decay_rate=decay_rate)
     sarsa_rewards = train_sarsa(sarsa_agent, env, n_episode=n_train)
     print(sarsa_agent)
     test_policy(agent=sarsa_agent, name="sarsa_agent", env_id=env_id, n_episodes=test_n_episode, record_video=record_video, video_dir=video_dir)
 
     # Q-learning — off-policy: learns optimal path along the cliff edge
-    ql_agent = QLearningCliffWalkingAgent(env, alpha=0.5, epsilon=1.0, min_epsilon=0.1, gamma=1.0, decay_rate=decay_rate)
+    ql_agent = QLearningCliffWalkingAgent(env, alpha=0.5, epsilon=0.2, min_epsilon=0.1, gamma=1.0, decay_rate=decay_rate)
     ql_rewards = train_qlearning(ql_agent, env, n_episode=n_train)
     print(ql_agent)
     test_policy(agent=ql_agent, name="ql_agent", env_id=env_id, n_episodes=test_n_episode, record_video=record_video, video_dir=video_dir)

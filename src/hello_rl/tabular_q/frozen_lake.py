@@ -11,6 +11,17 @@ from abc import ABC, abstractmethod
 from gymnasium.spaces.utils import flatdim
 
 
+"""
+Q-Learning assumes future behavior will be greedy (the max). So it estimates the value of the
+cliff-edge path as if it will never randomly fall. It learns the theoretically optimal path
+(shortest route), because its updates ignore the exploration noise.
+
+SARSA accounts for the fact that its future self will sometimes explore randomly. The cliff-edge
+path gets penalized because SARSA "knows" it will occasionally stumble off the edge. So it learns
+to stay away — the longer but safer inland path.
+"""
+
+
 class FrozenLakeAgent(ABC):
     def __init__(self, env: FrozenLakeEnv):
         self.obs_space = env.observation_space
@@ -115,9 +126,9 @@ def test_policy(agent: FrozenLakeAgent, name: str, env: Env, n_episodes: int = 1
     print(f"Win rate: {total_rewards / n_episodes:.1%}")
     return avg_rew
 
-def train_sarsa(agent: SARSAFrozenLakeAgent, env: Env, n_episode: int = 1000) -> list[float]:
+def train_sarsa(agent: SARSAFrozenLakeAgent, env: Env, n_episode: int = 1000, verbose: bool = True) -> list[float]:
     rewards = []
-    with tqdm(range(n_episode), desc="train SARSA") as pbar:
+    with tqdm(range(n_episode), desc="train SARSA", disable=not verbose) as pbar:
         for ep in pbar:
             obs, _ = env.reset()
             action = agent.act(obs, eval=False)
@@ -138,9 +149,9 @@ def train_sarsa(agent: SARSAFrozenLakeAgent, env: Env, n_episode: int = 1000) ->
     return rewards
 
 
-def train_qlearning(agent: QLearningFrozenLakeAgent, env: Env, n_episode: int = 1000) -> list[float]:
+def train_qlearning(agent: QLearningFrozenLakeAgent, env: Env, n_episode: int = 1000, verbose: bool = True) -> list[float]:
     rewards = []
-    with tqdm(range(n_episode), desc="train Q-learning") as pbar:
+    with tqdm(range(n_episode), desc="train Q-learning", disable=not verbose) as pbar:
         for ep in pbar:
             obs, _ = env.reset()
             done = False
@@ -192,19 +203,19 @@ if __name__ == "__main__":
     slippery = True
     success_rate = 3.0/5.0
 
-    env = gym.make("FrozenLake-v1", map_name="8x8", is_slippery=slippery, success_rate=success_rate, reward_schedule=(1, 0, 0), render_mode="rgb_array" if record_video else None)
+    env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=slippery, success_rate=success_rate, reward_schedule=(1, 0, 0), render_mode="rgb_array" if record_video else None)
 
     # random agent
     random_agent = RandomFrozenLakeAgent(env)
     test_policy(agent=random_agent, name="random_agent", env=env, n_episodes=test_n_episode, record_video=record_video, video_dir=video_dir)
 
     # SARSA agent
-    sarsa_agent = SARSAFrozenLakeAgent(env, alpha=0.2, epsilon=1.0, min_epsilon=0.2, gamma=0.9, decay_rate=0.9999995)
+    sarsa_agent = SARSAFrozenLakeAgent(env, alpha=0.2, epsilon=1.0, min_epsilon=0.1, gamma=0.9, decay_rate=0.999999)
     sarsa_rewards = train_sarsa(sarsa_agent, env, n_episode=n_train)
     test_policy(agent=sarsa_agent, name="sarsa_agent", env=env, n_episodes=test_n_episode, record_video=record_video, video_dir=video_dir)
 
     # Q-learning agent
-    ql_agent = QLearningFrozenLakeAgent(env, alpha=0.2, epsilon=1.0, min_epsilon=0.2, gamma=0.9, decay_rate=0.9999995)
+    ql_agent = QLearningFrozenLakeAgent(env, alpha=0.2, epsilon=1.0, min_epsilon=0.1, gamma=0.9, decay_rate=0.999999)
     ql_rewards = train_qlearning(ql_agent, env, n_episode=n_train)
     test_policy(agent=ql_agent, name="ql_agent", env=env, n_episodes=test_n_episode, record_video=record_video, video_dir=video_dir)
 
